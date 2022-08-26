@@ -3,13 +3,13 @@ import {
   Controller,
   Get,
   HttpCode,
-  ParseIntPipe,
+  Patch,
   Post,
   Query,
-  ValidationPipe,
 } from '@nestjs/common';
 import { CreateMovieInput } from './dto/createMovie.dto';
 import { ListMoviesInput } from './dto/listMovies.dto';
+import { ModifyMovieInput } from './dto/modifyMovie.dto';
 import { MoviesService } from './movies.service';
 
 @Controller('movies')
@@ -28,5 +28,12 @@ export class MoviesController {
     const page = Math.abs(Number(data.page || 0));
     const movies = await this.movieService.moviePagination(page);
     return movies;
+  }
+
+  @Patch()
+  async updateMovie(@Body() data: ModifyMovieInput) {
+    const { movieId, ...rest } = data;
+    const movie = await this.movieService.updateMovie(movieId, rest);
+    return movie;
   }
 }

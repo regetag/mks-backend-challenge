@@ -1,7 +1,13 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Database } from '../database/database.provider';
 import { CreateMovieInput } from './dto/createMovie.dto';
+import { ModifyMovieInput } from './dto/modifyMovie.dto';
 
+type ModifyMovieData = Omit<ModifyMovieInput, 'movieId'>;
 @Injectable()
 export class MoviesService {
   constructor(private database: Database) {}
@@ -23,14 +29,36 @@ export class MoviesService {
   }
 
   public async moviePagination(page: number) {
+    const perPage = 10;
+
     const [movies, amount] = await this.database.moviesRepository.findAndCount({
-      skip: page * 10,
-      take: 10,
+      skip: page * perPage,
+      take: perPage,
     });
+
+    const maxPage = Math.trunc(amount / 10);
 
     return {
       movies,
-      maxPage: Math.trunc(amount / 10),
+      maxPage,
+      minPage: 0,
     };
+  }
+
+  public async updateMovie(movieId: string, data: ModifyMovieData) {
+    const movie = await this.database.moviesRepository.findOne({
+      where: {
+        id: movieId,
+      },
+    });
+
+    if (!movie) throw new NotFoundException('Movie not found');
+
+    for (const [key, value] of Object.entries(data)) {
+      if (!value) continue;
+      movie[key] = value;
+    }
+
+    return await this.database.moviesRepository.save(movie);
   }
 }
