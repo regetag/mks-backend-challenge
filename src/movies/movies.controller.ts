@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   Patch,
@@ -8,6 +9,7 @@ import {
   Query,
 } from '@nestjs/common';
 import { CreateMovieInput } from './dto/createMovie.dto';
+import { DeleteMovieInput } from './dto/deleteMovie.dto';
 import { ListMoviesInput } from './dto/listMovies.dto';
 import { ModifyMovieInput } from './dto/modifyMovie.dto';
 import { MoviesService } from './movies.service';
@@ -35,5 +37,12 @@ export class MoviesController {
     const { movieId, ...rest } = data;
     const movie = await this.movieService.updateMovie(movieId, rest);
     return movie;
+  }
+
+  @Delete()
+  @HttpCode(204)
+  async deleteMovie(@Body() data: DeleteMovieInput) {
+    await this.movieService.deleteMovie(data.movieId);
+    return;
   }
 }

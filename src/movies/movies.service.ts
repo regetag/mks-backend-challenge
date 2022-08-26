@@ -61,4 +61,16 @@ export class MoviesService {
 
     return await this.database.moviesRepository.save(movie);
   }
+
+  public async deleteMovie(movieId: string) {
+    const movie = await this.database.moviesRepository.findOne({
+      where: { id: movieId },
+    });
+
+    if (!movie) throw new NotFoundException('Movie not found');
+
+    await this.database.moviesRepository.remove(movie);
+
+    return;
+  }
 }
