@@ -1,13 +1,15 @@
-import { Controller, Get } from '@nestjs/common';
-import { Database } from 'src/database/database.provider';
+import { Body, Controller, Get, HttpCode, Post } from '@nestjs/common';
+import { CreateMovieInput } from './dto/createMovie.dto';
+import { MoviesService } from './movies.service';
 
 @Controller('movies')
 export class MoviesController {
-  constructor(private database: Database) {}
+  constructor(private movieService: MoviesService) {}
 
-  @Get()
-  hello() {
-    // const movieRepositorie = this.database.getRepository();
-    // Todo
+  @Post()
+  @HttpCode(201)
+  async createMovie(@Body() data: CreateMovieInput) {
+    const newMovie = await this.movieService.createMovie(data);
+    return newMovie;
   }
 }
