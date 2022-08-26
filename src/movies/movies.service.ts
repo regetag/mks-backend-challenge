@@ -21,4 +21,16 @@ export class MoviesService {
 
     return await this.database.moviesRepository.save(newMovie);
   }
+
+  public async moviePagination(page: number) {
+    const [movies, amount] = await this.database.moviesRepository.findAndCount({
+      skip: page * 10,
+      take: 10,
+    });
+
+    return {
+      movies,
+      maxPage: Math.trunc(amount / 10),
+    };
+  }
 }

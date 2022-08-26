@@ -8,6 +8,7 @@ async function bootstrap() {
   app.useGlobalPipes(
     new ValidationPipe({
       stopAtFirstError: false,
+      transform: true,
     }),
   );
   await app.listen(PORT);
