@@ -1,0 +1,16 @@
+version: '3.9'
+
+services:
+  postgres:
+    image: postgres:14.4
+    ports:
+      - 3690:5432
+    environment:
+      - POSTGRES_DB=movies
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_USER=movies
+  redis:
+    image: redis:7.04
+    ports:
+      - 3691:6379
+    
