@@ -9,8 +9,33 @@ services:
       - POSTGRES_DB=movies
       - POSTGRES_PASSWORD=password
       - POSTGRES_USER=movies
+    # healthcheck:
+    #   test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+    #   interval: 10s
+    #   timeout: 5s
+    #   retries: 5
+
   redis:
-    image: redis:7.04
+    image: redis:7.0.4
     ports:
       - 3691:6379
-    
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli --raw incr ping"]
+      interval: 1s
+      timeout: 3s
+      retries: 5
+
+
+  app:
+    build: ./
+    environment:
+      - NODE_ENV=prod
+      - PORT=80
+      - DB_URL=postgresql://movies:password@postgres:5432/movies?schema=public
+    ports:
+      - 3692:80
+    depends_on:
+      # postgres: 
+      #   condition: service_healthy
+      redis: 
+        condition: service_healthy

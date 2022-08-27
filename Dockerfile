@@ -13,5 +13,7 @@ COPY . .
 RUN pnpm prebuild; pnpm build
 
 ENV NODE_ENV=prod
+ENV PORT=8080
+EXPOSE 8080
 
 CMD pnpm start:prod

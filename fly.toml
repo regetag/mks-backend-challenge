@@ -1,12 +1,11 @@
-# fly.toml file generated for ancient-star-7589 on 2022-08-27T07:59:50-03:00
+# fly.toml file generated for fragrant-thunder-7263 on 2022-08-27T11:00:01-03:00
 
-app = "ancient-star-7589"
+app = "fragrant-thunder-7263"
 kill_signal = "SIGINT"
 kill_timeout = 5
 processes = []
 
 [env]
-PORT=80
 
 [experimental]
   allowed_public_ports = []
