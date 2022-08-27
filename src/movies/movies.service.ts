@@ -1,13 +1,21 @@
 import {
   BadRequestException,
+  ConflictException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { Movie } from 'src/database/entities/Movies.entity';
 import { Database } from '../database/database.provider';
 import { CreateMovieInput } from './dto/createMovie.dto';
 import { ModifyMovieInput } from './dto/modifyMovie.dto';
 
 type ModifyMovieData = Omit<ModifyMovieInput, 'movieId'>;
+
+export type ImoviePagination = {
+  maxPage: number;
+  minPage: number;
+  movies: Movie[];
+};
 @Injectable()
 export class MoviesService {
   constructor(private database: Database) {}
@@ -20,7 +28,7 @@ export class MoviesService {
     });
 
     if (movieAlreadyExists) {
-      throw new BadRequestException('Title already in use!');
+      throw new ConflictException('Title already in use!');
     }
 
     const newMovie = this.database.moviesRepository.create({ ...data });
@@ -28,7 +36,7 @@ export class MoviesService {
     return await this.database.moviesRepository.save(newMovie);
   }
 
-  public async moviePagination(page: number) {
+  public async moviePagination(page: number): Promise<ImoviePagination> {
     const perPage = 10;
 
     const [movies, amount] = await this.database.moviesRepository.findAndCount({

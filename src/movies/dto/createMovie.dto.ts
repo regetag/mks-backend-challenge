@@ -1,17 +1,28 @@
 import { Length, IsUrl, IsOptional, IsDate } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateMovieInput {
+  @ApiProperty({
+    minLength: 1,
+    maxLength: 250,
+  })
   @Length(1, 250)
   title: string;
 
+  @ApiProperty({
+    minLength: 1,
+    maxLength: 500,
+  })
   @Length(1, 500)
   description: string;
 
+  @ApiPropertyOptional({})
   @IsUrl()
   @IsOptional()
-  coverURI: string;
+  coverURI: string | null;
 
+  @ApiPropertyOptional()
   @IsOptional()
   @IsDate()
-  releaseDate: Date;
+  releaseDate: Date | null;
 }

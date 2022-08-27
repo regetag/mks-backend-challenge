@@ -8,23 +8,41 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
+import {
+  ApiQuery,
+  ApiCreatedResponse,
+  ApiConflictResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { CreateMovieInput } from './dto/createMovie.dto';
 import { DeleteMovieInput } from './dto/deleteMovie.dto';
 import { ListMoviesInput } from './dto/listMovies.dto';
 import { ModifyMovieInput } from './dto/modifyMovie.dto';
 import { MoviesService } from './movies.service';
 
+@ApiTags('movies')
 @Controller('movies')
 export class MoviesController {
   constructor(private movieService: MoviesService) {}
 
   @Post()
+  @ApiCreatedResponse({
+    description: 'Succesful movie creation',
+  })
+  @ApiConflictResponse({
+    description: 'Returns conflict when title is already registered',
+  })
   @HttpCode(201)
   async createMovie(@Body() data: CreateMovieInput) {
     const newMovie = await this.movieService.createMovie(data);
     return newMovie;
   }
 
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    example: 0,
+  })
   @Get()
   async listMovies(@Query() data: ListMoviesInput) {
     const page = Math.abs(Number(data.page || 0));
