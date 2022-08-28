@@ -1,10 +1,10 @@
 import { ConflictException, Injectable } from '@nestjs/common';
-import { Database } from 'src/database/database.provider';
+import { DatabaseProvider } from '../database/database.provider';
 import { CreateUserInput } from './dto/createUser.dto';
 
 @Injectable()
 export class UsersService {
-  constructor(private database: Database) {}
+  constructor(private database: DatabaseProvider) {}
 
   async createUser(data: CreateUserInput) {
     const doUserExists = await this.database.userRepository.findOne({

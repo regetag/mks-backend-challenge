@@ -1,11 +1,13 @@
 import {
-  BadRequestException,
+  CACHE_MANAGER,
   ConflictException,
+  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { Movie } from 'src/database/entities/Movies.entity';
-import { Database } from '../database/database.provider';
+import { Cache } from 'cache-manager';
+import { Movie } from '../database/entities/Movies.entity';
+import { DatabaseProvider } from '../database/database.provider';
 import { CreateMovieInput } from './dto/createMovie.dto';
 import { ModifyMovieInput } from './dto/modifyMovie.dto';
 
@@ -18,7 +20,10 @@ export type ImoviePagination = {
 };
 @Injectable()
 export class MoviesService {
-  constructor(private database: Database) {}
+  constructor(
+    private database: DatabaseProvider,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
+  ) {}
 
   public async createMovie(data: CreateMovieInput) {
     const movieAlreadyExists = await this.database.moviesRepository.findOne({
@@ -31,26 +36,44 @@ export class MoviesService {
       throw new ConflictException('Title already in use!');
     }
 
-    const newMovie = this.database.moviesRepository.create({ ...data });
+    const newMovie = this.database.moviesRepository.create(data);
 
-    return await this.database.moviesRepository.save(newMovie);
+    const savedMovie = await Promise.all([
+      this.database.moviesRepository.save(newMovie),
+      this.cacheManager.reset(),
+    ])[0];
+
+    return savedMovie;
   }
 
   public async moviePagination(page: number): Promise<ImoviePagination> {
     const perPage = 10;
+
+    const cacheKey = `movies-page-${page}`;
+    const cacheData = await (this.cacheManager.get(cacheKey) as Promise<
+      string | undefined
+    >);
+
+    if (cacheData) return JSON.parse(cacheData);
 
     const [movies, amount] = await this.database.moviesRepository.findAndCount({
       skip: page * perPage,
       take: perPage,
     });
 
-    const maxPage = Math.trunc(amount / 10);
-
-    return {
+    const result = {
       movies,
-      maxPage,
+      maxPage: Math.trunc(amount / 10),
       minPage: 0,
     };
+
+    if (movies.length) {
+      await this.cacheManager.set(cacheKey, JSON.stringify(result), {
+        ttl: 60 * 5,
+      });
+    }
+
+    return result;
   }
 
   public async updateMovie(movieId: string, data: ModifyMovieData) {
@@ -67,7 +90,12 @@ export class MoviesService {
       movie[key] = value;
     }
 
-    return await this.database.moviesRepository.save(movie);
+    const newMovie = await Promise.all([
+      await this.database.moviesRepository.save(movie),
+      await this.cacheManager.reset(),
+    ])[0];
+
+    return newMovie;
   }
 
   public async deleteMovie(movieId: string) {
@@ -77,7 +105,10 @@ export class MoviesService {
 
     if (!movie) throw new NotFoundException('Movie not found');
 
-    await this.database.moviesRepository.remove(movie);
+    await Promise.all([
+      this.database.moviesRepository.remove(movie),
+      this.cacheManager.reset(),
+    ]);
 
     return;
   }
