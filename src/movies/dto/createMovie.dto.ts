@@ -1,4 +1,4 @@
-import { Length, IsUrl, IsOptional, IsDate } from 'class-validator';
+import { Length, IsUrl, IsOptional, IsDateString } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateMovieInput {
@@ -23,6 +23,6 @@ export class CreateMovieInput {
 
   @ApiPropertyOptional()
   @IsOptional()
-  @IsDate()
+  @IsDateString()
   releaseDate: Date | null;
 }
