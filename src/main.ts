@@ -16,6 +16,7 @@ async function bootstrap() {
       'MIT',
       'https://github.com/regetag/mks-backend-challenge/blob/main/LICENSE',
     )
+    .addBearerAuth()
     .build();
   const swaggerDoc = SwaggerModule.createDocument(app, swaggerConf);
 

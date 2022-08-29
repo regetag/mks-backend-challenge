@@ -14,6 +14,11 @@ import {
   ApiCreatedResponse,
   ApiConflictResponse,
   ApiTags,
+  ApiBearerAuth,
+  ApiUnauthorizedResponse,
+  ApiNoContentResponse,
+  ApiNotFoundResponse,
+  ApiOkResponse,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { CreateMovieInput } from './dto/createMovie.dto';
@@ -23,17 +28,21 @@ import { ModifyMovieInput } from './dto/modifyMovie.dto';
 import { MoviesService } from './movies.service';
 
 @ApiTags('movies')
+@ApiBearerAuth()
 @Controller('movies')
+@ApiUnauthorizedResponse({
+  description: 'Retuns unauthorized when Bearer token not set or invalid.',
+})
 @UseGuards(JwtAuthGuard)
 export class MoviesController {
   constructor(private movieService: MoviesService) {}
 
   @Post()
   @ApiCreatedResponse({
-    description: 'Succesful movie creation',
+    description: 'Successful movie creation.',
   })
   @ApiConflictResponse({
-    description: 'Returns conflict when title is already registered',
+    description: 'Returns conflict when title is already registered.',
   })
   @HttpCode(201)
   async createMovie(@Body() data: CreateMovieInput) {
@@ -41,12 +50,15 @@ export class MoviesController {
     return newMovie;
   }
 
+  @Get()
   @ApiQuery({
     name: 'page',
     required: false,
     example: 0,
   })
-  @Get()
+  @ApiOkResponse({
+    description: 'Returns a list of movies.',
+  })
   async listMovies(@Query() data: ListMoviesInput) {
     const page = Math.abs(Number(data.page || 0));
     const movies = await this.movieService.moviePagination(page);
@@ -54,6 +66,12 @@ export class MoviesController {
   }
 
   @Patch()
+  @ApiOkResponse({
+    description: 'Returns ok when successfuly update a movie.',
+  })
+  @ApiNotFoundResponse({
+    description: 'Returns a not found when given movieId is invalid.',
+  })
   async updateMovie(@Body() data: ModifyMovieInput) {
     const { movieId, ...rest } = data;
     const movie = await this.movieService.updateMovie(movieId, rest);
@@ -62,6 +80,12 @@ export class MoviesController {
 
   @Delete()
   @HttpCode(204)
+  @ApiNoContentResponse({
+    description: 'Returns no content when successfuly delete a movie.',
+  })
+  @ApiNotFoundResponse({
+    description: 'Returns a not found when given movieId is invalid.',
+  })
   async deleteMovie(@Body() data: DeleteMovieInput) {
     await this.movieService.deleteMovie(data.movieId);
     return;
