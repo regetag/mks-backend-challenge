@@ -4,6 +4,7 @@ import { DatabaseModule } from './database/database.module';
 import { UsersModule } from './users/users.module';
 import * as redisStore from 'cache-manager-redis-store';
 import type { ClientOpts } from 'redis';
+import { AuthModule } from './auth/auth.module';
 @Module({
   imports: [
     DatabaseModule,
@@ -15,6 +16,7 @@ import type { ClientOpts } from 'redis';
       ttl: 60 * 5,
       isGlobal: true,
     }),
+    AuthModule,
   ],
   controllers: [],
   providers: [],

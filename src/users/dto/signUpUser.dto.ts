@@ -1,7 +1,7 @@
 import { IsEmail, Length } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
-export class CreateUserInput {
+export class SignUpInput {
   @ApiProperty()
   @IsEmail()
   email: string;

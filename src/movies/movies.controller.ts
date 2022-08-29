@@ -7,6 +7,7 @@ import {
   Patch,
   Post,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import {
   ApiQuery,
@@ -14,6 +15,7 @@ import {
   ApiConflictResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { CreateMovieInput } from './dto/createMovie.dto';
 import { DeleteMovieInput } from './dto/deleteMovie.dto';
 import { ListMoviesInput } from './dto/listMovies.dto';
@@ -22,6 +24,7 @@ import { MoviesService } from './movies.service';
 
 @ApiTags('movies')
 @Controller('movies')
+@UseGuards(JwtAuthGuard)
 export class MoviesController {
   constructor(private movieService: MoviesService) {}
 
